@@ -3,11 +3,9 @@ package com.dineshworkspace.coroutinesplayground
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -19,13 +17,11 @@ class CoroutinesViewModel @Inject constructor() : ViewModel() {
 
     /**
      * Simply launching a new coroutine by using launch function and not specifying any Dispatchers
-     * This creates a new Coroutine and run the coroutine in the caller thread, in this case it will be main thread
+     * If we use viewModelScope.launch or lifecycleScope.launch without specifying any Dispatchers, the coroutine will run in the main thread
      */
     fun launchNewCoroutineOnMainThread() {
         viewModelScope.launch(CoroutineName("Luke")) {
-            val message = messageBuilder(this.coroutineContext)
-            _snackMessage.value = message
-            println(message)
+            println(messageBuilder(this.coroutineContext))
         }
     }
 
@@ -40,12 +36,27 @@ class CoroutinesViewModel @Inject constructor() : ViewModel() {
      */
     fun launchNewCoroutineOnNewThread() {
         viewModelScope.launch(Dispatchers.IO + CoroutineName("Leia")) {
-            val message = messageBuilder(this.coroutineContext)
-            _snackMessage.value = message
-            println(message)
+            println(messageBuilder(this.coroutineContext))
         }
     }
 
-    private fun messageBuilder(coroutineContext: CoroutineContext) = "${coroutineContext[CoroutineName.Key]} is executing on thread : ${Thread.currentThread().name}"
+    /**
+     * Launching a new coroutine by using GlobalScope will use the Dispatchers.Default
+     * The Dispatchers.Default dispatcher is optimized for CPU-bound work
+     * it uses a shared thread pool that has as many threads as there are CPU cores available.
+     */
+    @OptIn(DelicateCoroutinesApi::class)
+    fun launchGlobalCoroutineWithDefaultDispatcher() {
+        GlobalScope.launch(CoroutineName("Jyn")) {
+            println(messageBuilder(this.coroutineContext))
+        }
+    }
+
+    private fun messageBuilder(coroutineContext: CoroutineContext): String {
+        val message =
+            "${coroutineContext[CoroutineName.Key]} is executing on thread : ${Thread.currentThread().name}"
+        _snackMessage.value = message
+        return message
+    }
 
 }
