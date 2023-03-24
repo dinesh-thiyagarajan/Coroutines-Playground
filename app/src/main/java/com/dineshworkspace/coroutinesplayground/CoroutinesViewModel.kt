@@ -1,5 +1,7 @@
 package com.dineshworkspace.coroutinesplayground
 
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -98,19 +100,76 @@ class CoroutinesViewModel @Inject constructor() : ViewModel() {
     }
 
 
-
+    /**
+     * In this case coroutine will use the dispatcher of the immediate scope it is run from.
+     * Even though this function is called with IO Dispatcher, since it is run in ViewModelScope without specifying any dispatcher, it will run in main thread
+     */
     fun launchCoroutineInViewModelScope() {
         viewModelScope.launch(CoroutineName("Snowy")) {
             println(messageBuilder(this.coroutineContext))
         }
     }
 
+    suspend fun launchMultipleCoroutinesWithFailure() {
+        viewModelScope.launch {
+            val job1 = launch {
+                println("Job 1 completed")
+            }
+            val job2 = launch {
+                try {
+                    throw Exception("Job 2 failed")
+                } catch (e: Exception) {
+                    println("Job 2 failed")
+                }
+            }
+            val job3 = launch {
+                println("Job 3 completed")
+            }
+        }
+        println("All jobs completed")
+    }
 
     /**
      * Async Await will wait for the return value and then only the remaining part of the function will execute
-     * In the case below the _snackMessage.value = deferredResult.await() will wait until the code inside the async scope is completed
+     * In the case below the print statement execution will wait until the code inside the async scope is completed
      */
-    suspend fun startAsyncAwaitCoroutine() {
+    suspend fun startAsyncAwaitCoroutine(){
+        val result = viewModelScope.async(CoroutineName("Async await simple")) {
+            println(messageBuilder(this.coroutineContext))
+            val data = newFun()
+            println("Async execution completed. Result: $data")
+        }
+        result.await()
+        println("This will not execute till async result is completed")
+    }
+
+    /**
+     * Async Await is useful when there is dependency of one part of the program in another part ie., when sequence of execution has to be preserved
+     * In the case below the print statement execution will wait until the code inside the async scope is completed
+     */
+    suspend fun startMultipleAsyncCoroutinesWithAwait(){
+        val result1 = viewModelScope.async(CoroutineName("Async await 1")) {
+            println(messageBuilder(this.coroutineContext))
+            val data = newFun()
+            println("Async 1 execution completed. Result: $data")
+            return@async data
+        }
+        val result2 = viewModelScope.async(CoroutineName("Async await 2")+ Dispatchers.IO) {
+            println(messageBuilder(this.coroutineContext))
+            val data = newFun()
+            val data2 = newFun()
+            newFun()
+            newFun()
+            println("Async 2 execution completed. Result: $data")
+            return@async data+data2
+        }
+        println("Hi" )
+        val result = result1.await()
+        println("Result : $result" )
+    }
+
+
+    suspend fun startAsyncAwaitCoroutine1() {
         val deferredResult = viewModelScope.async(CoroutineName("Async Await") + Dispatchers.IO, start = CoroutineStart.LAZY) {
             //_snackMessage.value = "Please wait for 3 seconds"
             println(messageBuilder(this.coroutineContext, false))

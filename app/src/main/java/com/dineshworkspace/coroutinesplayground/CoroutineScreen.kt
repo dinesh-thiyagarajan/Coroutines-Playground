@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -94,9 +95,32 @@ fun CoroutineScreen(coroutinesViewModel: CoroutinesViewModel = hiltViewModel()) 
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
-            Text(text = "Launch Two Coroutines on Main Thread with Delay")
+            Text(text = "Launch Coroutine from IO Dispatcher and execute in ViewModelScope")
         }
 
+        Spacer(modifier = Modifier.padding(top = 10.dp))
+        Button(
+            onClick = {
+                coroutineScope.launch {
+                    coroutinesViewModel.startAsyncAwaitCoroutine()
+                }
+            },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text(text = "Simple async with await")
+        }
+
+        Spacer(modifier = Modifier.padding(top = 10.dp))
+        Button(
+            onClick = {
+                coroutineScope.launch {
+                    coroutinesViewModel.startMultipleAsyncCoroutinesWithAwait()
+                }
+            },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text(text = "Multiple async with await")
+        }
     }
 }
 
