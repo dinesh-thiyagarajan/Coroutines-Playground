@@ -10,18 +10,22 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @Preview
 @Composable
 fun CoroutineScreen(coroutinesViewModel: CoroutinesViewModel = hiltViewModel()) {
 
     val scaffoldState = rememberScaffoldState()
+    val coroutineScope = rememberCoroutineScope()
     SnackBar(coroutinesViewModel, scaffoldState)
 
     Column(
@@ -57,6 +61,42 @@ fun CoroutineScreen(coroutinesViewModel: CoroutinesViewModel = hiltViewModel()) 
             Text(text = "Launch GlobalScope Coroutine w/o Dispatchers")
         }
 
+        Spacer(modifier = Modifier.padding(top = 10.dp))
+        Button(
+            onClick = { coroutinesViewModel.launchNewCoroutineOnMainThreadWithHeavyProcessing() },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text(text = "Launch Coroutine with Heavy processing on Main thread")
+        }
+
+        Spacer(modifier = Modifier.padding(top = 10.dp))
+        Button(
+            onClick = { coroutinesViewModel.launchNewCoroutineOnWorkerThreadWithHeavyProcessing() },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text(text = "Launch Coroutine with Heavy processing on Worker thread")
+        }
+
+        Spacer(modifier = Modifier.padding(top = 10.dp))
+        Button(
+            onClick = { coroutinesViewModel.launchTwoCoroutinesOnMainWithDelay() },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text(text = "Launch Two Coroutines on Main Thread with Delay")
+        }
+
+        Spacer(modifier = Modifier.padding(top = 10.dp))
+        Button(
+            onClick = {
+                coroutineScope.launch(Dispatchers.IO) {
+                    coroutinesViewModel.launchCoroutineInViewModelScope()
+                }
+            },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text(text = "Launch Two Coroutines on Main Thread with Delay")
+        }
+
     }
 }
 
@@ -72,7 +112,8 @@ fun SnackBar(
             if (it.isNotEmpty()) {
                 scaffoldState.snackbarHostState.showSnackbar(
                     message = it,
-                    duration = SnackbarDuration.Long
+                    duration = SnackbarDuration.Long,
+                    actionLabel = "Ok"
                 )
             }
         }

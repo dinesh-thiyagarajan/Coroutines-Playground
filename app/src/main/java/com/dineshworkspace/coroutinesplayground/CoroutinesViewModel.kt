@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -14,6 +15,11 @@ class CoroutinesViewModel @Inject constructor() : ViewModel() {
 
     val snackMessage: StateFlow<String> get() = _snackMessage
     private val _snackMessage: MutableStateFlow<String> = MutableStateFlow("")
+
+    /** General points
+     * Launch is Fire and Forget the code below the coroutine wont wait for the result to be delivered
+     * In Async Await the remaining part of the function will wait for the async function to deliver a result
+     */
 
     /**
      * Simply launching a new coroutine by using launch function and not specifying any Dispatchers
@@ -52,10 +58,103 @@ class CoroutinesViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    private fun messageBuilder(coroutineContext: CoroutineContext): String {
+    /**
+     * In this case main thread will be blocked because we are running a heavy process on the main thread
+     * It run in main thread by default because we are using viewModelScope.launch and Dispatcher is not specified
+     */
+    fun launchNewCoroutineOnMainThreadWithHeavyProcessing() {
+        viewModelScope.launch(CoroutineName("Heavy Process on Main thread")) {
+            println(messageBuilder(this.coroutineContext))
+            println(newFun())
+        }
+        println("This will be printed only after the execution of whats inside launch")
+    }
+
+
+    /**
+     * In this case main thread will not be blocked because we are specifying Dispatchers.Default which runs the coroutine in worker thread
+     * So println statement wont wait for the completion of launch block
+     * launch will be ran by the Worker thread and println Statement will be executed by the Main Thread Simultaneously
+     */
+    fun launchNewCoroutineOnWorkerThreadWithHeavyProcessing() {
+        viewModelScope.launch(Dispatchers.Default + CoroutineName("Heavy Process on worker thread")) {
+            println(messageBuilder(this.coroutineContext))
+            println(newFun())
+        }
+        println("This will be printed parallely with the launch scope")
+    }
+
+
+    fun launchTwoCoroutinesOnMainWithDelay() {
+        viewModelScope.launch(Dispatchers.Main + CoroutineName("First")) {
+            println("Started Execution")
+            delay(2000)
+            println("First")
+        }
+
+        viewModelScope.launch(Dispatchers.Main + CoroutineName("Second")) {
+            println("Second")
+        }
+    }
+
+
+
+    fun launchCoroutineInViewModelScope() {
+        viewModelScope.launch(CoroutineName("Snowy")) {
+            println(messageBuilder(this.coroutineContext))
+        }
+    }
+
+
+    /**
+     * Async Await will wait for the return value and then only the remaining part of the function will execute
+     * In the case below the _snackMessage.value = deferredResult.await() will wait until the code inside the async scope is completed
+     */
+    suspend fun startAsyncAwaitCoroutine() {
+        val deferredResult = viewModelScope.async(CoroutineName("Async Await") + Dispatchers.IO, start = CoroutineStart.LAZY) {
+            //_snackMessage.value = "Please wait for 3 seconds"
+            println(messageBuilder(this.coroutineContext, false))
+            val data23 = newFun()
+            println(data23)
+            //return@async data23
+        }
+
+        //deferredResult.await()
+
+        val deferredResult2 = viewModelScope.async(CoroutineName("Async Await 2") +  Dispatchers.IO, start = CoroutineStart.LAZY) {
+            //_snackMessage.value = "Please wait for 3 seconds"
+            println(messageBuilder(this.coroutineContext, false))
+            val data23 = newFun()
+            println(data23)
+            //return@async data23
+        }
+
+        //deferredResult2.await()
+        //println(deferredResult2.await())
+    }
+
+    fun newFun(): Double {
+        val data = 0.0001232 + 39089238.3434
+        val data2 = 1 + data
+        val data3 = 1 + data2
+        val data4 = 1 + data3
+        var data5 = 1 + data4
+
+        for (i in 1..1000000000) {
+            data5 += i
+        }
+
+        return data5
+    }
+
+
+    private fun messageBuilder(
+        coroutineContext: CoroutineContext,
+        updateSnackMessage: Boolean = true
+    ): String {
         val message =
             "${coroutineContext[CoroutineName.Key]} is executing on thread : ${Thread.currentThread().name}"
-        _snackMessage.value = message
+        if (updateSnackMessage) _snackMessage.value = message
         return message
     }
 
