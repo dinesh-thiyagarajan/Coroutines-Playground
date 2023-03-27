@@ -114,12 +114,60 @@ fun CoroutineScreen(coroutinesViewModel: CoroutinesViewModel = hiltViewModel()) 
         Button(
             onClick = {
                 coroutineScope.launch {
-                    coroutinesViewModel.startMultipleAsyncCoroutinesWithAwait()
+                    coroutinesViewModel.startMultipleAsyncCoroutinesWithAwaitOnLongProcess()
                 }
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
-            Text(text = "Multiple async with await")
+            Text(text = "Multiple async with await on long process")
+        }
+
+        Spacer(modifier = Modifier.padding(top = 10.dp))
+        Button(
+            onClick = {
+                coroutineScope.launch {
+                    coroutinesViewModel.startMultipleAsyncCoroutinesWithAwaitOnShortProcess()
+                }
+            },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text(text = "Multiple async with await on short process")
+        }
+
+        Spacer(modifier = Modifier.padding(top = 10.dp))
+        Button(
+            onClick = {
+                coroutineScope.launch {
+                    coroutinesViewModel.startMultipleAsyncCoroutinesWithAwaitOnBothProcess()
+                }
+            },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text(text = "Multiple async with await on both process")
+        }
+
+        Spacer(modifier = Modifier.padding(top = 10.dp))
+        Button(
+            onClick = {
+                coroutineScope.launch {
+                    coroutinesViewModel.startDependentAsyncCoroutinesWithAwaitOnBothProcess_WrongWay()
+                }
+            },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text(text = "Multiple dependent async - wrong way")
+        }
+
+        Spacer(modifier = Modifier.padding(top = 10.dp))
+        Button(
+            onClick = {
+                coroutineScope.launch {
+                    coroutinesViewModel.startDependentAsyncCoroutinesWithAwaitOnBothProcess_RightWay()
+                }
+            },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text(text = "Multiple dependent async - right way")
         }
     }
 }
