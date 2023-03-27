@@ -16,18 +16,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Preview
 @Composable
-fun CoroutineScreen(coroutinesViewModel: CoroutinesViewModel = hiltViewModel()) {
-
-    val scaffoldState = rememberScaffoldState()
+fun CoroutineScreen(
+    coroutinesViewModel: CoroutinesViewModel = hiltViewModel()
+) {
     val coroutineScope = rememberCoroutineScope()
-    SnackBar(coroutinesViewModel, scaffoldState)
 
     Column(
         modifier = Modifier
@@ -150,7 +148,7 @@ fun CoroutineScreen(coroutinesViewModel: CoroutinesViewModel = hiltViewModel()) 
         Button(
             onClick = {
                 coroutineScope.launch {
-                    coroutinesViewModel.startDependentAsyncCoroutinesWithAwaitOnBothProcess_WrongWay()
+                    coroutinesViewModel.startDependentAsyncCoroutinesWithAwaitOnBothProcessWrongWay()
                 }
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -162,7 +160,7 @@ fun CoroutineScreen(coroutinesViewModel: CoroutinesViewModel = hiltViewModel()) 
         Button(
             onClick = {
                 coroutineScope.launch {
-                    coroutinesViewModel.startDependentAsyncCoroutinesWithAwaitOnBothProcess_RightWay()
+                    coroutinesViewModel.startDependentAsyncCoroutinesWithAwaitOnBothProcessRightWay()
                 }
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -176,8 +174,7 @@ fun CoroutineScreen(coroutinesViewModel: CoroutinesViewModel = hiltViewModel()) 
 @Composable
 fun SnackBar(
     coroutinesViewModel: CoroutinesViewModel,
-    scaffoldState: ScaffoldState,
-    content: Composable? = null
+    scaffoldState: ScaffoldState
 ) {
     LaunchedEffect(Unit) {
         coroutinesViewModel.snackMessage.collectLatest {
@@ -190,11 +187,5 @@ fun SnackBar(
             }
         }
     }
-
-    Scaffold(
-        scaffoldState = scaffoldState,
-        content =
-        { content }
-    )
 }
 

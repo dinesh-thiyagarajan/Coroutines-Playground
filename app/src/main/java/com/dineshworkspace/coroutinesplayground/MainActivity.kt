@@ -1,39 +1,38 @@
 package com.dineshworkspace.coroutinesplayground
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.dineshworkspace.coroutinesplayground.ui.theme.CoroutinesPlaygroundTheme
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.migration.CustomInjection.inject
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             CoroutinesPlaygroundTheme {
-                // A surface container using the 'background' color from the theme
+                val coroutinesViewModel: CoroutinesViewModel = hiltViewModel()
+                val scaffoldState = rememberScaffoldState()
+                SnackBar(coroutinesViewModel, scaffoldState)
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    CoroutineScreen()
+                    Scaffold(
+                        scaffoldState = scaffoldState,
+                        content =
+                        { CoroutineScreen() }
+                    )
                 }
             }
         }
