@@ -1,5 +1,5 @@
 
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/) [![Android CI](https://github.com/dinesh-thiyagarajan/Coroutines-Playground/actions/workflows/android.yml/badge.svg?branch=main)](https://github.com/dinesh-thiyagarajan/Coroutines-Playground/actions/workflows/android.yml)
 
 
 # Coroutines Playground
